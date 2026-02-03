@@ -13,38 +13,41 @@ public static class CollectionsExamples
         var seeder = new SeedGenerator();
 
         //List<T>
-        List<MusicGroup> music = seeder.ItemsToList<MusicGroup>(10);
+        //List<MusicGroup> music = seeder.ItemsToList<MusicGroup>(10);
 
         //music.ForEach(Console.WriteLine);
         //music.ForEach(mg => Console.WriteLine(mg));
 
-        System.Console.WriteLine("Start adding");
         var sw = new Stopwatch();
         sw.Start();
-        var giantlist = seeder.ItemsToList<MusicGroup>(1_000);
-        //var ll_giantlist = new LinkedList<MusicGroup>(giantlist);
+        System.Console.WriteLine("Creating");
+        var giantlist = seeder.ItemsToList<MusicGroupLazy>(1_000_000);
+        sw.Stop();
+        System.Console.WriteLine($"Elapsed time {sw.ElapsedMilliseconds} ms");
 
-        // for (int i = 0; i < 100_000; i++)
-        // {
-        //     giantlist.Insert(0,new MusicGroup().Seed(seeder));
-        //     //ll_giantlist.AddFirst(new MusicGroup().Seed(seeder));
+        var ll_giantlist = new LinkedList<MusicGroupLazy>(giantlist);
+        sw.Restart();
+        System.Console.WriteLine("Start adding");
+        for (int i = 0; i < 1_000_000; i++)
+        {
+            //giantlist.Insert(0,new MusicGroupLazy().Seed(seeder));
+            ll_giantlist.AddFirst(new MusicGroupLazy().Seed(seeder));
 
-        // }
-        // sw.Stop();
-        // System.Console.WriteLine($"Elapsed time {sw.ElapsedMilliseconds} ms");
+        }
+        sw.Stop();
+        System.Console.WriteLine($"Elapsed time {sw.ElapsedMilliseconds} ms");
+
 
         Console.WriteLine("Dictionary<TKey,TValue>");
         System.Console.WriteLine("Dictionary by MusicGenre");
-        var musicDict = new Dictionary<MusicGenre, List<MusicGroup>>();
+        var musicDict = new Dictionary<MusicGenre, List<MusicGroupLazy>>();
 
         for (MusicGenre g = MusicGenre.Rock; g <= MusicGenre.Metal; g++)
         {
-            musicDict[g] = giantlist.FindAll(mg => mg.Genre == g);   
+            musicDict[g] = ll_giantlist.Where(mg => mg.Genre == g).ToList();   
         }
 
-        System.Console.WriteLine("Jazz bands:");    
-        musicDict[MusicGenre.Jazz].ForEach(Console.WriteLine);
-        System.Console.WriteLine("Blues bands:");
-        musicDict[MusicGenre.Blues].ForEach(Console.WriteLine);
+        System.Console.WriteLine($"Nr of Jazz bands: {musicDict[MusicGenre.Jazz].Count()}");    
+        System.Console.WriteLine($"Nr of Blues bands: {musicDict[MusicGenre.Blues].Count()}");    
     }
 }
