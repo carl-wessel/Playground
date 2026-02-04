@@ -22,11 +22,7 @@ public static class AggregateExamples
         Console.WriteLine("--- Example 1: Basic Sum ---");
         
         // Range(1, 5) generates: 1, 2, 3, 4, 5
-        var sum = Enumerable.Range(1, 5)
-            .Aggregate(
-                0,  // Initial value (seed)
-                (accumulator, currentNumber) => accumulator + currentNumber
-            );
+        var sum = Enumerable.Range(1, 5).Aggregate(0, (accumulator, currentNumber) => accumulator + currentNumber);
         
         Console.WriteLine($"Sum of 1-5: {sum}");
         Console.WriteLine("Breakdown: 0 + 1 + 2 + 3 + 4 + 5 = 15\n");
@@ -40,7 +36,10 @@ public static class AggregateExamples
         var result = Enumerable.Range(1, 5)
             .Aggregate(
                 ImmutableList<string>.Empty,  // Start with empty list
-                (list, number) => list.Add($"Item {number}")
+                (list, number) => {
+                    var tl = list.Add($"Item {number}");
+                    return tl;
+                }
             );
         
         Console.WriteLine($"Built list: {string.Join(", ", result)}");
@@ -56,7 +55,10 @@ public static class AggregateExamples
         var (count, sum) = Enumerable.Range(1, 5)
             .Aggregate(
                 (Count: 0, Sum: 0),  // Initial state
-                (state, number) => (state.Count + 1, state.Sum + number)
+                (state, number) => {
+                    var newState = (Count: state.Count + 1, Sum: state.Sum + number);   
+                    return newState;
+                }
             );
         
         Console.WriteLine($"Count: {count}, Sum: {sum}");
@@ -101,7 +103,7 @@ public static class AggregateExamples
         var players = ImmutableList.Create("Alice", "Bob", "Charlie");
         
         // Deal 3 "rounds" where each player gets one number per round
-        var (finalCounter, playersWithNumbers) = Enumerable.Range(1, 3)
+        var (finalCounter, playersWithNumbers) = Enumerable.Range(1, 2)
             .Aggregate(
                 (Counter: 0, Players: players.Select(p => (Name: p, Numbers: ImmutableList<int>.Empty)).ToImmutableList()),
                 (outerState, round) =>
