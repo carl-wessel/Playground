@@ -25,10 +25,6 @@ public static class ScoreCardExtensions
         {
              return scoreCard with { Scores = scoreCard.Scores.SetItem(player.Name, scoreCard.Scores[player.Name].Add(score))};
         }
-        else if (scoreCard.Scores.ContainsKey(player.Name))     
-        {
-            return scoreCard with { Scores = scoreCard.Scores.SetItem(player.Name, scoreCard.Scores[player.Name].Add(score))};
-        }
 
         return scoreCard with { Scores = scoreCard.Scores.SetItem(player.Name, ImmutableList.Create(score))};
     }
