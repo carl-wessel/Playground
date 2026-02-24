@@ -23,7 +23,7 @@ public static class WebApiAccess
         // musicGroups = await repos.ReadMusicGroupsAsync(true, false, "", 0, musicGroups.DbItemsCount);
         Console.WriteLine($"Read {musicGroups.PageItems.Count} music groups");
 
-        var musicGroup = repos.ReadMusicGroupAsync(musicGroups.PageItems[0].MusicGroupId, false).Result;
+        var musicGroup = await repos.ReadMusicGroupAsync(musicGroups.PageItems[0].MusicGroupId, false);
         Console.WriteLine($"Read music group: {musicGroup.Item.Name}");
 
         var artists = musicGroup.Item.Artists;
