@@ -9,47 +9,42 @@ public static class YahzeeGame
 {
     public static void RunSimulation()
     {
-        Console.WriteLine("Testing the Cup of Dice.");
-
-        var cupOfDice = new CupOfDice(10);
-        Console.WriteLine($"Cup with 10 dice: {cupOfDice}\n");   
-
-        cupOfDice = new CupOfDice(2);
-        Console.WriteLine($"Cup with 2 dice: {cupOfDice}\n"); 
-
-
-        var yahzeeCup = new YahzeeCup();
-        Console.WriteLine($"Yahzee Cup with 5 dice: {yahzeeCup}\n");  
-
-        Enumerable.Range(1, 10)
-            .Aggregate(yahzeeCup, (currentCup, i) => 
-            {
-                var newCup = currentCup
-                .ShakeAndRoll();
-
-                newCup.Tap(cup => Console.WriteLine($"Yahzee Cup with 5 dice: {cup}"))
-                .GetYahtzeeCombination()
-                .Tap(ycombo =>  Console.WriteLine($"Yahzee Combination: {ycombo.GetType().Name}, Score: {ycombo.Score}\n"));
-                
-                return newCup;
-            });  
+        System.Console.WriteLine("\nYahtzee Round Simulation:");
+        System.Console.WriteLine("========================\n");
 
         ImmutableList<Player> players = ImmutableList.Create(
-            new Player("Alice", new YahzeeCup()),   
-            new Player("Bob", new YahzeeCup()),
-            new Player("Diana", new YahzeeCup()))
+            new Player("Carl", new YahzeeCup()),
+            new Player("Josef", new YahzeeCup()),
+            new Player("Martin", new YahzeeCup()))
+            .Tap(pl => Console.WriteLine(string.Join("\n", pl.Select(pl => $"{pl.Name} ready"))));
 
-            .Tap(p => Console.WriteLine(string.Join("\n", p.Select(pl => $"{pl.Name} has Yahtzee cup: {pl.YahzeeCup}"))));
+        var scoreCard = new YahtzeeScoreCard();
+        var maxAmountOfRoundsInYahtzee = 13;
+
+        var gameResult = Enumerable.Range(1, maxAmountOfRoundsInYahtzee)
+            .Aggregate(
+                (Players: players, ScoreCard: scoreCard),
+                (state, round) =>
+                {
+                    var afterRoll = state.Players
+                        .Select(pl => pl with { YahzeeCup = pl.YahzeeCup.ShakeAndRoll() })
+                        .ToImmutableList()
+                        .Tap(ps => Console.WriteLine($"\n=== Round {round} ===\n" + string.Join("\n", ps.Select(pl => $"{pl.Name}: {pl.YahzeeCup}"))));
 
 
-        System.Console.WriteLine("\nYahtzee Round Simulation:");
-        System.Console.WriteLine("Your code should implement the Yahtzee round simulation below.");
-        System.Console.WriteLine("========================");
+                    var updatedScoreCard = afterRoll.Aggregate(
+                        state.ScoreCard,
+                        (sc, pl) => sc.AddCombination(pl, pl.YahzeeCup.GetYahtzeeCombination(sc.GetUsedCategories(pl.Name))));
 
-        // Implement a Yahtzee round simulation here using functional patterns
 
-        // use existing monadic extensions and functional patterns
-        // minimize imperative code, maximize declative code using LINQ and extension methods
+                    updatedScoreCard
+                        .Tap(sc => sc.PrintRoundResults(afterRoll, round));
 
+                    return (afterRoll, updatedScoreCard);
+                });
+
+        gameResult.ScoreCard
+            .Tap(sc => sc.PrintFinalResults());
     }
+
 }
